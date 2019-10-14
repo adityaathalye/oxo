@@ -38,7 +38,7 @@ function reset_board {
 }
 
 function fit_val_to_square_grid {
-    printf "%s " ${1};
+    printf "%s%s" ${1} ' '
 }
 
 function fit_board_to_square_grid {
@@ -99,11 +99,11 @@ function display_oxo_board {
 # ########################################
 
 function __all_crosses {
-    grep -E "^X[[:space:]]X[[:space:]]X[[:space:]]$"
+    grep -E "^X[[:space:]]X[[:space:]]X[[:space:]]?$" > /dev/null
 }
 
 function __all_noughts {
-    grep -E "^O[[:space:]]O[[:space:]]O[[:space:]]$"
+    grep -E "^O[[:space:]]O[[:space:]]O[[:space:]]?$" > /dev/null
 }
 
 function __player_wins_grid_row {
@@ -127,9 +127,9 @@ function __player_wins_grid_left_diagonal {
 }
 
 function crosses_win {
-    1>2& echo "FIXME: I am a stub."; exit 0;
+    1>&2 echo "FIXME: I am a stub."; exit 0;
 }
 
 function noughts_win {
-    1>2& echo "FIXME: I am a stub."; exit 0;
+    1>&2 echo "FIXME: I am a stub."; exit 0;
 }

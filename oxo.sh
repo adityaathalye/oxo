@@ -48,6 +48,16 @@ function fit_board_to_square_grid {
         | fmt -w ${num_grid_columns} -
 }
 
+function transpose_board {
+    local board=$(cat ${@})
+
+    for i in $(seq ${square_side})
+    do printf "$board" |
+            cut -d ' ' -f ${i} |
+            paste -d ' ' -s
+    done
+}
+
 # We display based on the square grid
 function display_oxo_board {
     local row_labels='\n\n\n\ta\n\tb\n\tc'
@@ -57,4 +67,69 @@ function display_oxo_board {
           <(cat <(printf "$col_labels") \
                 <(fit_board_to_square_grid) \
                 <(printf "\n"))
+}
+
+# ########################################
+# SCORING LOGIC
+#
+# Base it on a regular, well-formatted, grid layout of the game state,
+# so we can have some fun exploiting the text processing power of bash.
+#
+# We have three victory scenarios that we can test as follows.
+#
+# Row Victory:
+#
+# - A player wins a game if the pattern of _any row_ is "X X X " or
+#   "O O O " in our scheme of things. This is simply a strict grep that
+#   succeeds (exit code 0) against our grid view:
+#
+#       grep -E "^X[[:space:]]X[[:space:]]X[[:space:]]$"
+#
+# Column Victory:
+#
+# - If we transpose the board (columns -> rows), then we can reuse the
+#   same grid-based grep-check to see if a player has won a column.
+#
+# Diagonal Victory:
+#
+# - And finally, if we extract diagonal items from the game state array
+#   into a grid-formatted row (say items 1,5,9), then we can again use
+#   the exact same grep test.
+#
+# ########################################
+
+function __all_crosses {
+    grep -E "^X[[:space:]]X[[:space:]]X[[:space:]]$"
+}
+
+function __all_noughts {
+    grep -E "^O[[:space:]]O[[:space:]]O[[:space:]]$"
+}
+
+function __player_wins_grid_row {
+    local player_win_func=${1}
+
+    fit_board_to_square_grid | $player_win_func
+}
+
+function __player_wins_grid_col {
+    local player_win_func=${1}
+
+    fit_board_to_square_grid | transpose_board | $player_win_func
+}
+
+function __player_wins_grid_left_diagonal {
+    local player_win_func=${1}
+
+    for board_pos in 1 5 9
+    do fit_val_to_square_grid ${board_state[${board_pos}]}
+    done | $player_win_func
+}
+
+function crosses_win {
+    1>2& echo "FIXME: I am a stub."; exit 0;
+}
+
+function noughts_win {
+    1>2& echo "FIXME: I am a stub."; exit 0;
 }

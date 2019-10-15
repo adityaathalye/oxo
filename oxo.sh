@@ -22,7 +22,19 @@
 # nought = O (upper case o)
 declare -a board_state
 declare -r square_side=3
-declare -r board_size=$(( square_side * square_side ))
+declare -r board_size=$(( ${square_side} * ${square_side} ))
+
+declare -a diagonal_left &&
+    for i in $(seq ${square_side})
+    do diagonal_left[${i}]=$(( (${square_side} * (${i} - 1)) + ${i} ))
+    done &&
+    declare -r diagonal_left
+
+declare -a diagonal_right &&
+    for i in $(seq ${square_side})
+    do diagonal_right[${i}]=$(( (${square_side} * ${i}) - (${i} - 1) ))
+    done &&
+    declare -r diagonal_right
 
 function set_pos_to_val {
     local pos=${1}
@@ -118,12 +130,25 @@ function __player_wins_grid_col {
     fit_board_to_square_grid | transpose_board | $player_win_func
 }
 
+function __extract_this_diagonal {
+    local diagonal=${1}
+
+    for board_pos in ${diagonal}
+    do fit_val_to_square_grid ${board_state[${board_pos}]}
+    done
+}
+
 function __player_wins_grid_left_diagonal {
     local player_win_func=${1}
 
-    for board_pos in 1 5 9
-    do fit_val_to_square_grid ${board_state[${board_pos}]}
-    done | $player_win_func
+    __extract_this_diagonal "${diagonal_left[*]}" | $player_win_func
+}
+
+function __player_wins_grid_right_diagonal {
+    local player_win_func=${1}
+
+    __extract_this_diagonal "${diagonal_right[*]}" | $player_win_func
+}
 }
 
 function crosses_win {

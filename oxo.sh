@@ -149,12 +149,23 @@ function __player_wins_grid_right_diagonal {
 
     __extract_this_diagonal "${diagonal_right[*]}" | $player_win_func
 }
+
+function __player_wins_grid {
+    local player_win_func=${1}
+
+    if __player_wins_grid_row $player_win_func \
+            || __player_wins_grid_col $player_win_func \
+            || __player_wins_grid_left_diagonal $player_win_func \
+            || __player_wins_grid_right_diagonal $player_win_func
+    then true
+    else false
+    fi
 }
 
 function crosses_win {
-    1>&2 echo "FIXME: I am a stub."; exit 0;
+    __player_wins_grid __all_crosses
 }
 
 function noughts_win {
-    1>&2 echo "FIXME: I am a stub."; exit 0;
+    __player_wins_grid __all_noughts
 }

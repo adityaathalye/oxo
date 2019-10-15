@@ -48,4 +48,13 @@ set_board_to_values "$victory_right_diagonal_Os";
 if __player_wins_grid_right_diagonal __all_noughts
 then echo "Player won Right Diagonal Os!"
 fi
+
+set_board_to_values "$victory_left_diagonal_Xs";
+if crosses_win
+then echo "Crosses won!"
+fi
+
+set_board_to_values "$victory_right_diagonal_Os";
+if noughts_win
+then echo "Noughts won!"
 fi

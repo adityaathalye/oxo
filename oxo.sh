@@ -36,6 +36,7 @@ declare -a diagonal_right &&
     done &&
     declare -r diagonal_right
 
+
 function set_pos_to_val {
     local pos=${1}
     local val=${2}
@@ -54,19 +55,21 @@ function fit_val_to_square_grid {
 }
 
 function fit_board_to_square_grid {
-    local num_grid_columns=$(( ${square_side} * 2 ))
-
-    for val in ${board_state[*]}; do fit_val_to_square_grid ${val} ; done \
-        | fmt -w ${num_grid_columns} -
+    for pos in $(seq ${board_size});
+    do if [[ $(( $pos % $square_side )) == 0 ]]
+       then printf "%s \n" $(fit_val_to_square_grid ${board_state[${pos}]})
+       else fit_val_to_square_grid ${board_state[${pos}]}
+       fi
+    done
 }
 
 function transpose_board {
     local board=$(cat ${@})
 
-    for i in $(seq ${square_side})
-    do printf "$board" |
-            cut -d ' ' -f ${i} |
-            paste -d ' ' -s
+    __transpose_col() { cut -d ' ' -f ${1} | paste -d ' ' -s; }
+
+    for col_num in $(seq ${square_side})
+    do printf "%s \n" "$(printf "${board}" | __transpose_col ${col_num})"
     done
 }
 
@@ -109,13 +112,14 @@ function display_oxo_board {
 #   the exact same grep test.
 #
 # ########################################
-
 function __all_crosses {
-    grep -E "^X[[:space:]]X[[:space:]]X[[:space:]]?$" > /dev/null
+    local all_Xs_pattern="$(printf "^(X[[:space:]]){%s}$" ${square_side})"
+    grep -E "${all_Xs_pattern}" > /dev/null
 }
 
 function __all_noughts {
-    grep -E "^O[[:space:]]O[[:space:]]O[[:space:]]?$" > /dev/null
+    local all_Os_pattern="$(printf "^(O[[:space:]]){%s}$" ${square_side})"
+    grep -E "${all_Os_pattern}" > /dev/null
 }
 
 function __player_wins_grid_row {

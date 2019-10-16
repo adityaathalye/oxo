@@ -24,6 +24,25 @@ declare -a board_state
 declare -r square_side=3
 declare -r board_size=$(( ${square_side} * ${square_side} ))
 
+# Note: these array assignments create zero-indexed arrays
+declare -a positions=($(seq $board_size))
+declare -a col_labels=($(seq ${square_side}))
+declare -a row_labels=($(head -n ${square_side} <(printf "%s\n" {a..z})))
+declare -a pos_labels=($(for r in ${row_labels[*]}
+                         do for c in ${col_labels[*]}
+                            do printf "%s%s " ${r} ${c}
+                            done
+                         done))
+
+declare -A pos_lookup_table &&
+    for pos in ${positions[*]}
+    do array_idx=$(( $pos -1 ))
+       pos_lookup_key="${pos_labels[$array_idx]}"
+       pos_lookup_val="${positions[$array_idx]}"
+       pos_lookup_table[${pos_lookup_key}]=${pos_lookup_val}
+    done &&
+    unset array_idx pos_lookup_key pos_lookup_val # don't pollute global vars
+
 declare -a diagonal_left &&
     for i in $(seq ${square_side})
     do diagonal_left[${i}]=$(( (${square_side} * (${i} - 1)) + ${i} ))
@@ -75,13 +94,11 @@ function transpose_board {
 
 # We display based on the square grid
 function display_oxo_board {
-    local row_labels='\n\n\n\ta\n\tb\n\tc'
-    local col_labels='\n\t1 2 3\n\n'
-
-    paste <(printf ${row_labels}) \
-          <(cat <(printf "$col_labels") \
-                <(fit_board_to_square_grid) \
-                <(printf "\n"))
+    printf "\n"
+    printf "\t\t%s\n\n" "$(printf "%s " ${col_labels[*]})"
+    paste <(printf "\t%s\n" ${row_labels[*]}) \
+          <(fit_board_to_square_grid)
+    printf "\n"
 }
 
 # ########################################
@@ -173,3 +190,23 @@ function crosses_win {
 function noughts_win {
     __player_wins_grid __all_noughts
 }
+
+
+# ########################################
+# PLAYER ACTIONS
+#
+# - The only thing a player can do is point to the position they
+#   want filled with their assigned symbol X or O.
+#
+# ########################################
+
+
+
+
+# ########################################
+# GAME LOOP
+#
+# - On each move, check if noughts won, or crosses won
+#
+#
+# ########################################

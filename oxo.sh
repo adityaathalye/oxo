@@ -198,10 +198,32 @@ function noughts_win {
 # - The only thing a player can do is point to the position they
 #   want filled with their assigned symbol X or O.
 #
+# - Only an empty position may be overwritten with legal X/O values.
+#
+# - Once an X or an O is written to a position, it may never be overwritten.
+#
 # ########################################
 
+function pos_is_empty {
+    local position="${1}"
+    [[ ${board_state[${position}]} == '-' ]]
+}
 
+function set_pos_to_X {
+    local position="${1}"
+    if pos_is_empty ${position}
+    then set_pos_to_val ${position} 'X'
+    else false
+    fi
+}
 
+function set_pos_to_O {
+    local position="${1}"
+    if pos_is_empty ${position}
+    then set_pos_to_val ${position} 'O'
+    else false
+    fi
+}
 
 # ########################################
 # GAME LOOP

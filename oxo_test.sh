@@ -5,10 +5,10 @@ source "./oxo.sh"
 verbose="${1}"
 
 function set_board_to_values {
-    local __values=${1}
+    local -a __values=(${1})
 
     for i in $(seq ${board_size})
-    do set_pos_to_val ${i} "$(printf "$__values" | cut -d ' ' -f ${i})"
+    do set_pos_to_val ${i} "${__values[$(( ${i} - 1 ))]}"
     done
 
     if [[ "${verbose}" == "-v" ]]

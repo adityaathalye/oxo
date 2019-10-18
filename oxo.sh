@@ -22,12 +22,14 @@ declare -r FALSE=1
 
 # ########################################
 # BOARD DESIGN
-# ########################################
-
+#
 # All oxo boards are squares, and the board state is an array of:
 # empty  = - (hyphen)
 # cross  = X (upper case x)
 # nought = O (upper case o)
+#
+# ########################################
+
 declare -a board_state
 declare -r square_side=3
 declare -r board_size=$(( ${square_side} * ${square_side} ))

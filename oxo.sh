@@ -13,6 +13,14 @@
 
 
 # ########################################
+# GLOBALS
+# ########################################
+
+declare -r TRUE=0
+declare -r FALSE=1
+
+
+# ########################################
 # BOARD DESIGN
 # ########################################
 
@@ -232,3 +240,57 @@ function set_pos_to_O {
 #
 #
 # ########################################
+
+
+function game_loop {
+    local game_is_afoot=${TRUE} # the game is always afoot!
+    local player_X_turn=${TRUE} # X always plays first when the game begins
+    local player_O_turn=${FALSE}
+
+    while [[ ${game_is_afoot} == ${TRUE} ]] ; do
+        # Clean slate
+        sleep 1
+        clear
+
+        cat <<EOF
+======================================================================
+
+THE GAME IS AFOOT!
+
+    Please choose: Position (e.g. a1 or b3 or c2)  |  (Q)uit
+
+======================================================================
+
+EOF
+
+        display_oxo_board
+
+        read -p "Your choice: " player_choice
+
+        printf "\n"
+
+        case "${player_choice}" in
+            q|Q )
+                # Terminate the game
+                printf "%s\n\n" "Thank you for playing; bye bye!"
+                game_is_afoot=${FALSE}
+                ;;
+            [${row_labels[0]}-${row_labels[-1]}][${col_labels[0]}-${col_labels[-1]}] )
+                # NOTE: Bash does NOT perform quote removal for patterns, so trying
+                # to generate a pattern as follows does NOT work as hoped:
+                #
+                #      $(printf "%s|" ${pos_labels[*]} | sed -E 's;\|$;;') ) list ;;
+                #
+                #      # produces  a1|a2|a3|b1|b2|b3|c1|c2|c3  which _looks_ like a
+                #      # pattern, but is effectively a single string that DOES NOT
+                #      # get further stripped into a case match _pattern_.
+                #
+                printf "choice %s, position is %s\n" "${player_choice}" "${pos_lookup_table[${player_choice}]}"
+                ;;
+            * ) printf "\nBAD CHOICE. Please retry.\n\n" ;;
+        esac
+    done
+}
+
+reset_board
+game_loop

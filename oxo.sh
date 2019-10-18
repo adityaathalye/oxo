@@ -266,36 +266,77 @@ function game_loop {
     local game_is_afoot=${TRUE} # the game is always afoot!
     local player_X_turn=${TRUE} # X always plays first when the game begins
     local player_O_turn=${FALSE}
+    local player_choice player_prompt # define variables for use below
 
-    while [[ ${game_is_afoot} == ${TRUE} ]] ; do
-        # Clean slate
-        sleep 1
-        clear
-
+    function __display_header {
         cat <<EOF
-======================================================================
+xoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxo
 
 THE GAME IS AFOOT!
 
-    Please choose: Position (e.g. a1 or b3 or c2)  |  (Q)uit
+    Choose position (e.g. a1 or b3 or c2)  |  (Q)uit
 
-======================================================================
-
+xoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxo
 EOF
+    }
 
+    function __display_player_prompt {
+        if [[ ${player_X_turn} == ${TRUE} ]]
+        then printf "%s " "Player X's choice: "
+        else printf "%s " "Player O's choice: "
+        fi
+    }
+
+    function __toggle_player {
+        if [[ ${player_X_turn} == ${TRUE} ]]
+        then player_O_turn=${TRUE}
+             player_X_turn=${FALSE}
+        else player_X_turn=${TRUE}
+             player_O_turn=${FALSE}
+        fi
+    }
+
+    while [[ ${game_is_afoot} == ${TRUE} ]] ; do
+
+        # ##################################################
+        # Repaint display
+        # ##################################################
+        clear
+        __display_header
         display_oxo_board
 
-        read -p "Your choice: " player_choice
+        # ##################################################
+        # Loop only while the game can still legally go on
+        # ##################################################
 
-        printf "\n"
+        if noughts_win
+        then player_choice="Q"  # Hook into "quit" case, handled below
+             printf "\n%s\n" "GAME OVER... NOUGHTS WON!"
+        elif crosses_win
+        then player_choice="Q"  # Hook into "quit" case, handled below
+             printf "\n%s\n" "GAME OVER... CROSSES WON!"
+        else                    # Accept player input, handled below
+            read -p "$(__display_player_prompt)" player_choice
+        fi
+
+        # ##################################################
+        # Handle player choice
+        # ##################################################
 
         case "${player_choice}" in
             q|Q )
-                # Terminate the game
-                printf "%s\n\n" "Thank you for playing; bye bye!"
+                # ##################################################
+                # Terminate the game and cleanup any runtime stuff
+                # ##################################################
+                printf "\n%s\n\n" "Thank you for playing; bye bye!"
                 game_is_afoot=${FALSE}
                 ;;
+
             [${row_labels[0]}-${row_labels[-1]}][${col_labels[0]}-${col_labels[-1]}] )
+                # ##################################################
+                # Safe-set the matched position for the current player
+                # ##################################################
+                #
                 # NOTE: Bash does NOT perform quote removal for patterns, so trying
                 # to generate a pattern as follows does NOT work as hoped:
                 #
@@ -305,12 +346,19 @@ EOF
                 #      # pattern, but is effectively a single string that DOES NOT
                 #      # get further stripped into a case match _pattern_.
                 #
-                printf "choice %s, position is %s\n" "${player_choice}" "${pos_lookup_table[${player_choice}]}"
+
+                [[ ${player_X_turn} == ${TRUE} ]] \
+                    && set_pos_to_X ${pos_lookup_table[${player_choice}]} \
+                    && __toggle_player # cause toggle IFF position is set by player successfully
+
+                [[ ${player_O_turn} == ${TRUE} ]] \
+                    && set_pos_to_O ${pos_lookup_table[${player_choice}]} \
+                    && __toggle_player # cause toggle IFF position is set by player successfully
                 ;;
-            * ) printf "\nBAD CHOICE. Please retry.\n\n" ;;
+
+            * ) printf "BAD CHOICE. Please retry. "
+                sleep 1
+                ;;
         esac
     done
 }
-
-reset_board
-game_loop

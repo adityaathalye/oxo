@@ -98,7 +98,7 @@ function transpose_board {
     __transpose_col() { cut -d ' ' -f ${1} | paste -d ' ' -s; }
 
     for col_num in $(seq ${square_side})
-    do printf "%s \n" "$(printf "${board}" | __transpose_col ${col_num})"
+    do printf "%s \n" "$(printf "%s" "${board}" | __transpose_col ${col_num})"
     done
 }
 

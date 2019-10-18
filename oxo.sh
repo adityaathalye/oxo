@@ -243,6 +243,24 @@ function set_pos_to_O {
 #
 # ########################################
 
+function animate_loading_symbol {
+    local loop_count=${1:-2}
+    local char_sequence=('.' 'o' 'O' 'X' 'x' '.')
+    local char_times_to_print=3
+    local sleep_sec="0.1"
+
+    for _ in $(seq ${loop_count})
+    do for c in ${char_sequence[*]}
+       do for _ in $(seq ${char_times_to_print})
+          do printf "%s" "${c}"
+             sleep ${sleep_sec}
+          done
+          for _ in $(seq ${char_times_to_print})
+          do printf "\b"
+          done
+       done
+    done
+}
 
 function game_loop {
     local game_is_afoot=${TRUE} # the game is always afoot!

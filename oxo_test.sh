@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source "./oxo.sh"
+source ./oxo_logic.sh
 
 verbose="${1}"
 

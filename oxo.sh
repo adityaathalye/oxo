@@ -149,6 +149,10 @@ function __all_noughts {
     grep -E "${all_Os_pattern}" > /dev/null
 }
 
+function __player_move_available {
+    fit_board_to_square_grid | grep '-' > /dev/null
+}
+
 function __player_wins_grid_row {
     local player_win_func=${1}
 
@@ -201,6 +205,14 @@ function noughts_win {
     __player_wins_grid __all_noughts
 }
 
+function its_a_draw {
+    if crosses_win \
+            || noughts_win \
+            || __player_move_available
+    then false
+    else true
+    fi
+}
 
 # ########################################
 # PLAYER ACTIONS
@@ -315,6 +327,9 @@ EOF
         elif crosses_win
         then player_choice="Q"  # Hook into "quit" case, handled below
              printf "\n%s\n" "GAME OVER... CROSSES WON!"
+        elif its_a_draw
+        then player_choice="Q"  # Hook into "quit" case, handled below
+             printf "\n%s\n" "GAME OVER... ITS A DRAW!"
         else                    # Accept player input, handled below
             read -p "$(__display_player_prompt)" player_choice
         fi

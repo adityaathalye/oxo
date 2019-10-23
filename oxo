@@ -38,4 +38,4 @@ do
 done
 
 sleep 1
-game_loop
+game_loop ${computer_opponent}

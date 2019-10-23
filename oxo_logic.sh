@@ -303,6 +303,7 @@ function animate_loading_symbol {
 }
 
 function game_loop {
+    local computer_opponent=${1:-${FALSE}} # init game for 2 player by default
     local game_is_afoot=${TRUE} # the game is always afoot!
     local player_X_turn=${TRUE} # X always plays first when the game begins
     local player_O_turn=${FALSE}
@@ -358,6 +359,10 @@ EOF
         elif its_a_draw
         then player_choice="Q"  # Hook into "quit" case, handled below
              printf "\n%s\n" "GAME OVER... ITS A DRAW!"
+        elif [[ ${computer_opponent} == ${TRUE} && ${player_O_turn} == ${TRUE} ]]
+        then                    # Get the computer to make its move
+            printf "%s " "Computer is thinking..."; animate_loading_symbol 1;
+            read -p "$(__display_player_prompt)" player_choice <<<"$(get_label_for_random_empty_pos)"
         else                    # Accept player input, handled below
             read -p "$(__display_player_prompt)" player_choice
         fi

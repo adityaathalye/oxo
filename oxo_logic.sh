@@ -111,6 +111,34 @@ function display_oxo_board {
     printf "\n"
 }
 
+
+# ##################################################
+# RANDOM Player support
+# ##################################################
+
+function __get_random_pos {
+    printf "$(( ${RANDOM} % ${1:-$board_size}  + 1 ))"
+}
+
+function __get_labels_for_empty_pos {
+    for pos in $(seq ${board_size})
+    do if [[ ${board_state[${pos}]} == "-" ]]
+       then printf "%s " ${pos_labels[$(( ${pos} - 1 ))]}
+       fi
+    done
+}
+
+function get_label_for_random_empty_pos {
+    local labels_for_empty_pos=($(__get_labels_for_empty_pos))
+    local num_empty_pos=${#labels_for_empty_pos[*]}
+
+    local empty_pos_labels_rand_idx=$(( $(__get_random_pos ${num_empty_pos}) - 1 ))
+
+    # lookup and emit label for randomly picked empty position, such that
+    # which we can pass it into regular gameplay, as computer's choice
+    printf "%s" ${labels_for_empty_pos[${empty_pos_labels_rand_idx}]}
+}
+
 # ########################################
 # SCORING LOGIC
 #

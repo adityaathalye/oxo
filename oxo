@@ -16,6 +16,6 @@ fi
 
 reset_board
 clear
-printf "\nLoading game "; animate_loading_symbol; printf "THE GAME IS AFOOT!"
+printf "\nLoading game "; animate_loading_symbol; printf "THE GAME IS AFOOT!\n\n"
 sleep 1
 game_loop

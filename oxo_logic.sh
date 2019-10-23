@@ -259,7 +259,7 @@ function animate_loading_symbol {
     local loop_count=${1:-2}
     local char_sequence=('.' 'o' 'O' 'X' 'x' '.')
     local char_times_to_print=3
-    local sleep_sec="0.1"
+    local sleep_sec="0.075"
 
     for _ in $(seq ${loop_count})
     do for c in ${char_sequence[*]}

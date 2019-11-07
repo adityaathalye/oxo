@@ -13,11 +13,19 @@
 
 
 # ########################################
-# GLOBALS
+# GLOBALS and UTILS
 # ########################################
+
+declare -r square_side=3
+declare -r board_size=$(( ${square_side} * ${square_side} ))
 
 declare -r TRUE=0
 declare -r FALSE=1
+
+function to_indices {
+    local array_size=${1}
+    printf "%s " $(seq 0 $(( ${array_size} - 1)))
+}
 
 
 # ########################################
@@ -30,14 +38,12 @@ declare -r FALSE=1
 #
 # ########################################
 
-declare -r square_side=3
-declare -r board_size=$(( ${square_side} * ${square_side} ))
-declare -a board_state=($(for _ in $(seq $board_size)
-                          do printf "%s " '-'
-                          done))
+declare -a board_state
+declare -a positions=($(to_indices ${board_size}))
 
-# Note: these array assignments create zero-indexed arrays
-declare -a positions=(${!board_state[*]})
+# We expect players to visually locate board positions on the game board,
+# and mark the desired positions by Row-Column pair <character><integer>,
+# such as a1, a3, b2, c1.
 declare -a col_labels=($(seq ${square_side}))
 declare -a row_labels=($(head -n ${square_side} <(printf "%s\n" {a..z})))
 declare -a pos_labels=($(for r in ${row_labels[*]}
@@ -46,6 +52,8 @@ declare -a pos_labels=($(for r in ${row_labels[*]}
                             done
                          done))
 
+# Given player input, we need to reverse-lookup the corresponding index
+# position in the array that stores the board's state.
 declare -A pos_lookup_table &&
     for pos in ${positions[*]}
     do pos_lookup_key="${pos_labels[$pos]}"
@@ -55,13 +63,8 @@ declare -A pos_lookup_table &&
     unset array_idx pos_lookup_key pos_lookup_val # don't pollute global vars
 
 
-function to_indices {
-    local array_size=${1}
-
-    printf "%s " $(seq 0 $(( ${array_size} - 1)))
-}
-
-
+# Pre-calculate indices for diagonal positions stored in the board state array.
+# We will need to check state of diagonals for scoring purposes.
 declare -a diagonal_left &&
     for i in $(to_indices ${square_side})
     do diagonal_left[${i}]=$(( (${square_side} * ${i}) + ${i} ))
@@ -74,6 +77,11 @@ declare -a diagonal_right &&
     do diagonal_right[${i}]=$(( (${square_side} * (${i} + 1 )) - (${i} + 1) ))
     done &&
     declare -r diagonal_right
+
+
+# ########################################
+# BOARD STATE AND DISPLAY MANIPULATION UTILITIES
+# ########################################
 
 
 function set_pos_to_val {

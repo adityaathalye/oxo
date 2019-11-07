@@ -30,12 +30,14 @@ declare -r FALSE=1
 #
 # ########################################
 
-declare -a board_state
 declare -r square_side=3
 declare -r board_size=$(( ${square_side} * ${square_side} ))
+declare -a board_state=($(for _ in $(seq $board_size)
+                          do printf "%s " '-'
+                          done))
 
 # Note: these array assignments create zero-indexed arrays
-declare -a positions=($(seq $board_size))
+declare -a positions=(${!board_state[*]})
 declare -a col_labels=($(seq ${square_side}))
 declare -a row_labels=($(head -n ${square_side} <(printf "%s\n" {a..z})))
 declare -a pos_labels=($(for r in ${row_labels[*]}
@@ -46,22 +48,30 @@ declare -a pos_labels=($(for r in ${row_labels[*]}
 
 declare -A pos_lookup_table &&
     for pos in ${positions[*]}
-    do array_idx=$(( $pos -1 ))
-       pos_lookup_key="${pos_labels[$array_idx]}"
-       pos_lookup_val="${positions[$array_idx]}"
+    do pos_lookup_key="${pos_labels[$pos]}"
+       pos_lookup_val="${positions[$pos]}"
        pos_lookup_table[${pos_lookup_key}]=${pos_lookup_val}
     done &&
     unset array_idx pos_lookup_key pos_lookup_val # don't pollute global vars
 
+
+function to_indices {
+    local array_size=${1}
+
+    printf "%s " $(seq 0 $(( ${array_size} - 1)))
+}
+
+
 declare -a diagonal_left &&
-    for i in $(seq ${square_side})
-    do diagonal_left[${i}]=$(( (${square_side} * (${i} - 1)) + ${i} ))
+    for i in $(to_indices ${square_side})
+    do diagonal_left[${i}]=$(( (${square_side} * ${i}) + ${i} ))
     done &&
     declare -r diagonal_left
 
+
 declare -a diagonal_right &&
-    for i in $(seq ${square_side})
-    do diagonal_right[${i}]=$(( (${square_side} * ${i}) - (${i} - 1) ))
+    for i in $(to_indices ${square_side})
+    do diagonal_right[${i}]=$(( (${square_side} * (${i} + 1 )) - (${i} + 1) ))
     done &&
     declare -r diagonal_right
 
@@ -74,7 +84,7 @@ function set_pos_to_val {
 }
 
 function reset_board {
-    for i in $(seq ${board_size});
+    for i in $(to_indices ${board_size});
     do set_pos_to_val ${i} "-";
     done
 }
@@ -84,8 +94,8 @@ function fit_val_to_square_grid {
 }
 
 function fit_board_to_square_grid {
-    for pos in $(seq ${board_size});
-    do if [[ $(( $pos % $square_side )) == 0 ]]
+    for pos in $(to_indices ${board_size})
+    do if [[ $(( ($pos + 1) % $square_side )) == 0 ]]
        then printf "%s \n" $(fit_val_to_square_grid ${board_state[${pos}]})
        else fit_val_to_square_grid ${board_state[${pos}]}
        fi
@@ -117,13 +127,13 @@ function display_oxo_board {
 # ##################################################
 
 function __get_random_pos {
-    printf "$(( ${RANDOM} % ${1:-$board_size}  + 1 ))"
+    printf "$(( ${RANDOM} % ${1} ))"
 }
 
 function __get_labels_for_empty_pos {
-    for pos in $(seq ${board_size})
+    for pos in $(to_indices ${board_size})
     do if [[ ${board_state[${pos}]} == "-" ]]
-       then printf "%s " ${pos_labels[$(( ${pos} - 1 ))]}
+       then printf "%s " ${pos_labels[${pos}]}
        fi
     done
 }
@@ -132,7 +142,7 @@ function get_label_for_random_empty_pos {
     local labels_for_empty_pos=($(__get_labels_for_empty_pos))
     local num_empty_pos=${#labels_for_empty_pos[*]}
 
-    local empty_pos_labels_rand_idx=$(( $(__get_random_pos ${num_empty_pos}) - 1 ))
+    local empty_pos_labels_rand_idx=$(__get_random_pos ${num_empty_pos})
 
     # lookup and emit label for randomly picked empty position, such that
     # which we can pass it into regular gameplay, as computer's choice

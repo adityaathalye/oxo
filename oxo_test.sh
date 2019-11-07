@@ -7,8 +7,8 @@ verbose="${1}"
 function set_board_to_values {
     local -a __values=(${1})
 
-    for i in $(seq ${board_size})
-    do set_pos_to_val ${i} "${__values[$(( ${i} - 1 ))]}"
+    for i in $(to_indices ${board_size})
+    do set_pos_to_val ${i} "${__values[${i}]}"
     done
 
     if [[ "${verbose}" == "-v" ]]

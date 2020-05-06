@@ -306,11 +306,10 @@ function set_pos_to_O {
 #
 # - On each move, check if noughts won, or crosses won
 #
-#
 # ########################################
 
 function animate_loading_symbol {
-    local loop_count=${1:-2}
+    local loop_count=${1:-1}
     local char_sequence=('.' 'o' 'O' 'X' 'x' '.')
     local char_times_to_print=3
     local sleep_sec="0.075"

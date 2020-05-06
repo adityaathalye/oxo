@@ -20,9 +20,10 @@ fi
 
 reset_board
 clear
-printf "\nLoading game "; animate_loading_symbol;
-spd-say "THE GAME IS AFOOT!" &
-printf "THE GAME IS AFOOT!\n\n"
+prompt "Welcome to Noughts and Crosses!"
+printf "\nLoading game "; animate_loading_symbol 2;
+prompt "THE GAME... IS AFOOT!"
+prompt "$(printf "\n%s\n" "Choose game mode: ")"
 
 select game_mode in "Two Player" "Computer Opponent" "Quit"
 do
@@ -33,6 +34,8 @@ do
            ;;
         2) prompt "$(printf "%s chosen...\n" "${game_mode}")"
            computer_opponent=${TRUE}
+           prompt "$(printf "\n%s\n" "You, are player X.")"
+           sleep 3
            break # selection acceptable; pass control to next statement
            ;;
         3) prompt "$(printf "\n%s\n" "Quitting.")"

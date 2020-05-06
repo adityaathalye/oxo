@@ -341,8 +341,8 @@ EOF
 
     function __display_player_prompt {
         if [[ ${player_X_turn} == ${TRUE} ]]
-        then printf "%s " "Player X's choice: "
-        else printf "%s " "Player O's choice: "
+        then printf "%s " "Player X's choice: " && spd-say "Player X's choice"
+        else printf "%s " "Player O's choice: " && spd-say "Player O's choice"
         fi
     }
 
@@ -370,16 +370,19 @@ EOF
 
         if noughts_win
         then player_choice="Q"  # Hook into "quit" case, handled below
-             printf "\n%s\n" "GAME OVER... NOUGHTS WON!"
+             printf "\n%s\n" "GAME OVER... NOUGHTS WON!" && spd-say "GAME OVER... NOUGHTS WON!"
         elif crosses_win
         then player_choice="Q"  # Hook into "quit" case, handled below
-             printf "\n%s\n" "GAME OVER... CROSSES WON!"
+             printf "\n%s\n" "GAME OVER... CROSSES WON!" && spd-say "GAME OVER... CROSSES WON!"
         elif its_a_draw
         then player_choice="Q"  # Hook into "quit" case, handled below
+             spd-say "GAME OVER... ITS A DRAW!"
              printf "\n%s\n" "GAME OVER... ITS A DRAW!"
         elif [[ ${computer_opponent} == ${TRUE} && ${player_O_turn} == ${TRUE} ]]
         then                    # Get the computer to make its move
-            printf "%s " "Computer is thinking..."; animate_loading_symbol 1;
+            printf "%s " "Computer is thinking..."
+            spd-say "Computer is thinking..." &
+            animate_loading_symbol 1;
             read -p "$(__display_player_prompt)" player_choice <<<"$(get_label_for_random_empty_pos)"
         else                    # Accept player input, handled below
             read -p "$(__display_player_prompt)" player_choice
@@ -395,6 +398,7 @@ EOF
                 # Terminate the game and cleanup any runtime stuff
                 # ##################################################
                 printf "\n%s\n\n" "Thank you for playing; bye bye!"
+                spd-say "Thank you for playing; bye bye!"
                 game_is_afoot=${FALSE}
                 ;;
 
@@ -423,7 +427,7 @@ EOF
                 ;;
 
             * ) printf "BAD CHOICE. Please retry. "
-                sleep 1
+                spd-say "BAD CHOICE, please retry." && sleep 1
                 ;;
         esac
     done

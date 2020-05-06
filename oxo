@@ -16,16 +16,20 @@ fi
 
 reset_board
 clear
-printf "\nLoading game "; animate_loading_symbol; printf "THE GAME IS AFOOT!\n\n"
+printf "\nLoading game "; animate_loading_symbol;
+spd-say "THE GAME IS AFOOT!" &
+printf "THE GAME IS AFOOT!\n\n"
 
 select game_mode in "Two Player" "Computer Opponent" "Quit"
 do
     case ${REPLY} in
         1) printf "%s chosen\n" "${game_mode}"
+           spd-say "$(printf "%s chosen\n" "${game_mode}")"
            computer_opponent=${FALSE}
            break # selection acceptable; pass control to next statement
            ;;
         2) printf "%s chosen\n" "${game_mode}"
+           spd-say "$(printf "%s chosen\n" "${game_mode}")"
            computer_opponent=${TRUE}
            break # selection acceptable; pass control to next statement
            ;;

@@ -10,29 +10,38 @@ if [[ ${BASH_VERSINFO[0]} -lt 4 || ${BASH_VERSINFO[1]} -lt 4 ]]
 then printf "%s\n" "WARNING Bash version should be 4.4+. Things may break with this version (${BASH_VERSION})."
 fi
 
+if ! which spd-say > /dev/null
+then printf "%s\n" "WARNING Voice prompt will not work because spd-say is not available."
+fi
+
 # ########################################
 # LET THE GAME BEGIN!!!
 # ########################################
 
 reset_board
 clear
-printf "\nLoading game "; animate_loading_symbol; printf "THE GAME IS AFOOT!\n\n"
+prompt "Welcome to Noughts and Crosses!"
+printf "\nLoading game "; animate_loading_symbol 2;
+prompt "THE GAME... IS AFOOT!"
+prompt "$(printf "\n%s\n" "Choose game mode: ")"
 
 select game_mode in "Two Player" "Computer Opponent" "Quit"
 do
     case ${REPLY} in
-        1) printf "%s chosen\n" "${game_mode}"
+        1) prompt "$(printf "%s chosen\n" "${game_mode}")"
            computer_opponent=${FALSE}
            break # selection acceptable; pass control to next statement
            ;;
-        2) printf "%s chosen\n" "${game_mode}"
+        2) prompt "$(printf "%s chosen...\n" "${game_mode}")"
            computer_opponent=${TRUE}
+           prompt "$(printf "\n%s\n" "You, are player X.")"
+           sleep 3
            break # selection acceptable; pass control to next statement
            ;;
-        3) printf "\nQuitting\n"
+        3) prompt "$(printf "\n%s\n" "Quitting.")"
            exit 0
            ;;
-        *) printf "Invalid choice.\n"
+        *) prompt "$(printf "\n%s\n" "Invalid choice.")"
            ;;
     esac
 done

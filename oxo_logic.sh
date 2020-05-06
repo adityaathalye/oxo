@@ -27,6 +27,14 @@ function to_indices {
     printf "%s " $(seq 0 $(( ${array_size} - 1)))
 }
 
+if which spd-say > /dev/null
+then voice_prompter='spd-say -e'
+else voice_prompter='tee /dev/null'
+fi && declare -r voice_prompter
+
+function prompt {
+    cat <<<"${@}" | $voice_prompter
+}
 
 # ########################################
 # BOARD DESIGN
@@ -298,11 +306,10 @@ function set_pos_to_O {
 #
 # - On each move, check if noughts won, or crosses won
 #
-#
 # ########################################
 
 function animate_loading_symbol {
-    local loop_count=${1:-2}
+    local loop_count=${1:-1}
     local char_sequence=('.' 'o' 'O' 'X' 'x' '.')
     local char_times_to_print=3
     local sleep_sec="0.075"
@@ -341,8 +348,8 @@ EOF
 
     function __display_player_prompt {
         if [[ ${player_X_turn} == ${TRUE} ]]
-        then printf "%s " "Player X's choice: "
-        else printf "%s " "Player O's choice: "
+        then prompt "Player X's choice: "
+        else prompt "Player O's choice: "
         fi
     }
 
@@ -370,17 +377,21 @@ EOF
 
         if noughts_win
         then player_choice="Q"  # Hook into "quit" case, handled below
-             printf "\n%s\n" "GAME OVER... NOUGHTS WON!"
+             prompt "$(printf "\n%s\n" "GAME OVER... NOUGHTS WON!")"
         elif crosses_win
         then player_choice="Q"  # Hook into "quit" case, handled below
-             printf "\n%s\n" "GAME OVER... CROSSES WON!"
+             prompt "$(printf "\n%s\n" "GAME OVER... CROSSES WON!")"
         elif its_a_draw
         then player_choice="Q"  # Hook into "quit" case, handled below
-             printf "\n%s\n" "GAME OVER... ITS A DRAW!"
+             prompt "$(printf "\n%s\n" "GAME OVER... IT'S A DRAW!")"
         elif [[ ${computer_opponent} == ${TRUE} && ${player_O_turn} == ${TRUE} ]]
         then                    # Get the computer to make its move
-            printf "%s " "Computer is thinking..."; animate_loading_symbol 1;
-            read -p "$(__display_player_prompt)" player_choice <<<"$(get_label_for_random_empty_pos)"
+            player_choice="$(get_label_for_random_empty_pos)"
+            __display_player_prompt
+            printf "Computer is thinking... "
+            animate_loading_symbol
+            prompt "Computer chose ${player_choice}"
+            sleep 2
         else                    # Accept player input, handled below
             read -p "$(__display_player_prompt)" player_choice
         fi
@@ -394,7 +405,7 @@ EOF
                 # ##################################################
                 # Terminate the game and cleanup any runtime stuff
                 # ##################################################
-                printf "\n%s\n\n" "Thank you for playing; bye bye!"
+                prompt "$(printf "\n%s\n\n" "Thank you for playing; bye bye!")"
                 game_is_afoot=${FALSE}
                 ;;
 
@@ -422,7 +433,7 @@ EOF
                     && __toggle_player # cause toggle IFF position is set by player successfully
                 ;;
 
-            * ) printf "BAD CHOICE. Please retry. "
+            * ) prompt "BAD CHOICE. Please retry. "
                 sleep 1
                 ;;
         esac

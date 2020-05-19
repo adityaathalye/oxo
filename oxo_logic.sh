@@ -28,9 +28,14 @@ to_indices() {
 }
 
 if which spd-say > /dev/null
-then voice_prompter='spd-say -e'
+then voice_prompter='spd-say -e -r 10'
+     is_voice_active=${TRUE}
+elif which say > /dev/null
+then voice_prompter='say -r 10 -f -'
+     is_voice_active=${TRUE}
 else voice_prompter='tee /dev/null'
-fi && declare -r voice_prompter
+     is_voice_active=${FALSE}
+fi && declare -r voice_prompter is_voice_active
 
 prompt() {
     cat <<<"${@}" | $voice_prompter

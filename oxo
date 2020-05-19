@@ -16,8 +16,8 @@ then prompt "$(printf "%s\n" "WARNING: Bash version should be 4.4+. Things may b
      pause_for_keypress
 fi
 
-if ! which spd-say > /dev/null
-then prompt "$(printf "%s\n" "WARNING: Voice prompt will NOT work, because spd-say is not available.")"
+if [[ ${is_voice_active} == ${FALSE} ]]
+then prompt "$(printf "%s\n" "WARNING: Speech synthesis program not found. Voice prompts are inactive.")"
      pause_for_keypress
 fi
 
@@ -41,7 +41,7 @@ do
            ;;
         2) prompt "$(printf "%s chosen...\n" "${game_mode}")"
            computer_opponent=${TRUE}
-           prompt "$(printf "\n%s\n" "You, are player X.")"
+           prompt "$(printf "\n%s\n" "You, are player \"X\".")"
            sleep 3
            break # selection acceptable; pass control to next statement
            ;;

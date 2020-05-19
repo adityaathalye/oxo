@@ -6,12 +6,19 @@ source ./oxo_logic.sh
 # BASIC SANITY / COMPATIBILITY CHECKS
 # ########################################
 
+pause_for_keypress() {
+    # Neat answer at https://unix.stackexchange.com/a/134554
+    read -n1 -rsp "$(prompt "Press any key to continue: ")"
+}
+
 if [[ ${BASH_VERSINFO[0]} -lt 4 || ${BASH_VERSINFO[1]} -lt 4 ]]
-then printf "%s\n" "WARNING Bash version should be 4.4+. Things may break with this version (${BASH_VERSION})."
+then prompt "$(printf "%s\n" "WARNING: Bash version should be 4.4+. Things may break with this version (${BASH_VERSION}).")"
+     pause_for_keypress
 fi
 
 if ! which spd-say > /dev/null
-then printf "%s\n" "WARNING Voice prompt will not work because spd-say is not available."
+then prompt "$(printf "%s\n" "WARNING: Voice prompt will NOT work, because spd-say is not available.")"
+     pause_for_keypress
 fi
 
 # ########################################
@@ -23,7 +30,7 @@ clear
 prompt "Welcome to Noughts and Crosses!"
 printf "\nLoading game "; animate_loading_symbol 2;
 prompt "THE GAME... IS AFOOT!"
-prompt "$(printf "\n%s\n" "Choose game mode: ")"
+prompt "$(printf "\n%s\n" "Pick a number, to choose game mode: ")"
 
 select game_mode in "Two Player" "Computer Opponent" "Quit"
 do

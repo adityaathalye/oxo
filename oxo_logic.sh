@@ -22,7 +22,7 @@ declare -r board_size=$(( ${square_side} * ${square_side} ))
 declare -r TRUE=0
 declare -r FALSE=1
 
-function to_indices {
+to_indices() {
     local array_size=${1}
     printf "%s " $(seq 0 $(( ${array_size} - 1)))
 }
@@ -32,7 +32,7 @@ then voice_prompter='spd-say -e'
 else voice_prompter='tee /dev/null'
 fi && declare -r voice_prompter
 
-function prompt {
+prompt() {
     cat <<<"${@}" | $voice_prompter
 }
 
@@ -92,24 +92,24 @@ declare -a diagonal_right &&
 # ########################################
 
 
-function set_pos_to_val {
+set_pos_to_val() {
     local pos=${1}
     local val=${2}
 
     board_state[${pos}]=${val}
 }
 
-function reset_board {
+reset_board() {
     for i in $(to_indices ${board_size});
     do set_pos_to_val ${i} "-";
     done
 }
 
-function fit_val_to_square_grid {
+fit_val_to_square_grid() {
     printf "%s%s" ${1} ' '
 }
 
-function fit_board_to_square_grid {
+fit_board_to_square_grid() {
     for pos in $(to_indices ${board_size})
     do if [[ $(( ($pos + 1) % $square_side )) == 0 ]]
        then printf "%s \n" $(fit_val_to_square_grid ${board_state[${pos}]})
@@ -118,7 +118,7 @@ function fit_board_to_square_grid {
     done
 }
 
-function transpose_board {
+transpose_board() {
     local board=$(cat ${@})
 
     __transpose_col() { cut -d ' ' -f ${1} | paste -d ' ' -s; }
@@ -129,7 +129,7 @@ function transpose_board {
 }
 
 # We display based on the square grid
-function display_oxo_board {
+display_oxo_board() {
     printf "\n"
     printf "\t\t%s\n\n" "$(printf "%s " ${col_labels[*]})"
     paste <(printf "\t%s\n" ${row_labels[*]}) \
@@ -142,11 +142,11 @@ function display_oxo_board {
 # RANDOM Player support
 # ##################################################
 
-function __get_random_pos {
+__get_random_pos() {
     printf "$(( ${RANDOM} % ${1} ))"
 }
 
-function __get_labels_for_empty_pos {
+__get_labels_for_empty_pos() {
     for pos in $(to_indices ${board_size})
     do if [[ ${board_state[${pos}]} == "-" ]]
        then printf "%s " ${pos_labels[${pos}]}
@@ -154,7 +154,7 @@ function __get_labels_for_empty_pos {
     done
 }
 
-function get_label_for_random_empty_pos {
+get_label_for_random_empty_pos() {
     local labels_for_empty_pos=($(__get_labels_for_empty_pos))
     local num_empty_pos=${#labels_for_empty_pos[*]}
 
@@ -193,33 +193,33 @@ function get_label_for_random_empty_pos {
 #   the exact same grep test.
 #
 # ########################################
-function __all_crosses {
+__all_crosses() {
     local all_Xs_pattern="$(printf "^(X[[:space:]]){%s}$" ${square_side})"
     grep -E "${all_Xs_pattern}" > /dev/null
 }
 
-function __all_noughts {
+__all_noughts() {
     local all_Os_pattern="$(printf "^(O[[:space:]]){%s}$" ${square_side})"
     grep -E "${all_Os_pattern}" > /dev/null
 }
 
-function __player_move_available {
+__player_move_available() {
     fit_board_to_square_grid | grep '-' > /dev/null
 }
 
-function __player_wins_grid_row {
+__player_wins_grid_row() {
     local player_win_func=${1}
 
     fit_board_to_square_grid | $player_win_func
 }
 
-function __player_wins_grid_col {
+__player_wins_grid_col() {
     local player_win_func=${1}
 
     fit_board_to_square_grid | transpose_board | $player_win_func
 }
 
-function __extract_this_diagonal {
+__extract_this_diagonal() {
     local diagonal=${1}
 
     for board_pos in ${diagonal}
@@ -227,19 +227,19 @@ function __extract_this_diagonal {
     done
 }
 
-function __player_wins_grid_left_diagonal {
+__player_wins_grid_left_diagonal() {
     local player_win_func=${1}
 
     __extract_this_diagonal "${diagonal_left[*]}" | $player_win_func
 }
 
-function __player_wins_grid_right_diagonal {
+__player_wins_grid_right_diagonal() {
     local player_win_func=${1}
 
     __extract_this_diagonal "${diagonal_right[*]}" | $player_win_func
 }
 
-function __player_wins_grid {
+__player_wins_grid() {
     local player_win_func=${1}
 
     if __player_wins_grid_row $player_win_func \
@@ -251,15 +251,15 @@ function __player_wins_grid {
     fi
 }
 
-function crosses_win {
+crosses_win() {
     __player_wins_grid __all_crosses
 }
 
-function noughts_win {
+noughts_win() {
     __player_wins_grid __all_noughts
 }
 
-function its_a_draw {
+its_a_draw() {
     if crosses_win \
             || noughts_win \
             || __player_move_available
@@ -280,12 +280,12 @@ function its_a_draw {
 #
 # ########################################
 
-function pos_is_empty {
+pos_is_empty() {
     local position="${1}"
     [[ ${board_state[${position}]} == '-' ]]
 }
 
-function set_pos_to_X {
+set_pos_to_X() {
     local position="${1}"
     if pos_is_empty ${position}
     then set_pos_to_val ${position} 'X'
@@ -293,7 +293,7 @@ function set_pos_to_X {
     fi
 }
 
-function set_pos_to_O {
+set_pos_to_O() {
     local position="${1}"
     if pos_is_empty ${position}
     then set_pos_to_val ${position} 'O'
@@ -308,7 +308,7 @@ function set_pos_to_O {
 #
 # ########################################
 
-function animate_loading_symbol {
+animate_loading_symbol() {
     local loop_count=${1:-1}
     local char_sequence=('.' 'o' 'O' 'X' 'x' '.')
     local char_times_to_print=3
@@ -327,14 +327,14 @@ function animate_loading_symbol {
     done
 }
 
-function game_loop {
+game_loop() {
     local computer_opponent=${1:-${FALSE}} # init game for 2 player by default
     local game_is_afoot=${TRUE} # the game is always afoot!
     local player_X_turn=${TRUE} # X always plays first when the game begins
     local player_O_turn=${FALSE}
     local player_choice player_prompt # define variables for use below
 
-    function __display_header {
+    __display_header() {
         cat <<EOF
 xoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxo
 
@@ -346,14 +346,14 @@ xoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxoxo
 EOF
     }
 
-    function __display_player_prompt {
+    __display_player_prompt() {
         if [[ ${player_X_turn} == ${TRUE} ]]
         then prompt "Player X's choice: "
         else prompt "Player O's choice: "
         fi
     }
 
-    function __toggle_player {
+    __toggle_player() {
         if [[ ${player_X_turn} == ${TRUE} ]]
         then player_O_turn=${TRUE}
              player_X_turn=${FALSE}

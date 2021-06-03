@@ -11,7 +11,7 @@ pause_for_keypress() {
     read -n1 -rsp "$(prompt "Press any key to continue: ")"
 }
 
-if [[ ${BASH_VERSINFO[0]} -lt 4 || ${BASH_VERSINFO[1]} -lt 4 ]]
+if [[ ${BASH_VERSINFO[0]} -le 4 && ${BASH_VERSINFO[1]} -lt 4 ]]
 then prompt "$(printf "%s\n" "WARNING: Bash version should be 4.4+. Things may break with this version (${BASH_VERSION}).")"
      pause_for_keypress
 fi
